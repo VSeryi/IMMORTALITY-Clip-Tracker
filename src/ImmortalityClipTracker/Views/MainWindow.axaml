@@ -1,0 +1,716 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:ImmortalityClipTracker.ViewModels"
+        xmlns:models="using:ImmortalityClipTracker.Models"
+        x:Class="ImmortalityClipTracker.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="IMMORTALITY Clip Tracker"
+        Icon="avares://ImmortalityClipTracker/Assets/icon.png"
+        Width="1200" Height="800" MinWidth="1000" MinHeight="660"
+        Background="{DynamicResource Base}">
+
+  <Window.Styles>
+    <Style Selector="Button.ghost">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="15,7" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+      <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+    </Style>
+    <Style Selector="Button.ghost:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Raised}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+      <Setter Property="TextBlock.Foreground" Value="{DynamicResource Ink}" />
+    </Style>
+
+    <Style Selector="Button.link">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+    </Style>
+    <Style Selector="Button.link:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="TextBlock.TextDecorations" Value="Underline" />
+    </Style>
+
+    <Style Selector="RadioButton.segment">
+      <Setter Property="Foreground" Value="{DynamicResource Muted}" />
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <!-- background lives in the styles below; a value set here would outrank them -->
+          <Border Name="chip">
+            <Grid RowDefinitions="*,2">
+              <ContentPresenter Content="{TemplateBinding Content}" Margin="6,9,6,8"
+                                HorizontalAlignment="Center" />
+              <Border Name="rule" Grid.Row="1" />
+            </Grid>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="RadioButton.segment /template/ Border#chip">
+      <Setter Property="Background" Value="{DynamicResource Base}" />
+    </Style>
+    <Style Selector="RadioButton.segment /template/ Border#rule">
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="RadioButton.segment:pointerover /template/ Border#chip">
+      <Setter Property="Background" Value="{DynamicResource Line}" />
+    </Style>
+    <Style Selector="RadioButton.segment:checked /template/ Border#chip">
+      <Setter Property="Background" Value="{DynamicResource Raised}" />
+    </Style>
+    <Style Selector="RadioButton.segment:checked /template/ Border#rule">
+      <Setter Property="Background" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="RadioButton.segment:checked">
+      <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+    </Style>
+
+    <Style Selector="ListBox.plain">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+    <Style Selector="ListBox.plain ListBoxItem">
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Margin" Value="0,0,0,4" />
+      <Setter Property="MinHeight" Value="0" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="ListBox.plain ListBoxItem /template/ ContentPresenter">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Padding" Value="0" />
+    </Style>
+
+    <Style Selector="Border.card">
+      <Setter Property="Background" Value="{DynamicResource Surface}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="Padding" Value="14,12" />
+    </Style>
+    <Style Selector="ListBoxItem:pointerover Border.card">
+      <Setter Property="Background" Value="{DynamicResource Raised}" />
+    </Style>
+    <Style Selector="ListBoxItem:selected Border.card">
+      <Setter Property="Background" Value="{DynamicResource Raised}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+    </Style>
+
+    <Style Selector="TextBlock.eyebrow">
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="LetterSpacing" Value="2.5" />
+      <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+      <Setter Property="Foreground" Value="{DynamicResource Faint}" />
+    </Style>
+    <Style Selector="TextBlock.slug">
+      <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+    </Style>
+    <Style Selector="TextBlock.slate">
+      <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Foreground" Value="{DynamicResource Ink}" />
+    </Style>
+    <Style Selector="TextBlock.slateKey">
+      <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="LetterSpacing" Value="1.5" />
+      <Setter Property="Foreground" Value="{DynamicResource Faint}" />
+      <Setter Property="Margin" Value="0,2,0,0" />
+    </Style>
+
+    <Style Selector="ToggleButton.switch">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Name="track" Width="44" Height="26"
+                  Background="{DynamicResource Base}"
+                  BorderBrush="{DynamicResource Line}" BorderThickness="1">
+            <Border Name="knob" Width="16" Height="16" Margin="4,0"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    Background="{DynamicResource Faint}" />
+          </Border>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+    <Style Selector="ToggleButton.switch:pointerover /template/ Border#track">
+      <Setter Property="BorderBrush" Value="{DynamicResource Muted}" />
+    </Style>
+    <Style Selector="ToggleButton.switch:checked /template/ Border#track">
+      <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="ToggleButton.switch:checked /template/ Border#knob">
+      <Setter Property="HorizontalAlignment" Value="Right" />
+      <Setter Property="Background" Value="{DynamicResource Accent}" />
+    </Style>
+
+    <Style Selector="ComboBoxItem:selected /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Raised}" />
+    </Style>
+    <Style Selector="ComboBoxItem:selected">
+      <Setter Property="Foreground" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource Line}" />
+    </Style>
+    <Style Selector="ComboBoxItem">
+      <Setter Property="CornerRadius" Value="0" />
+      <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="ComboBox">
+      <Setter Property="FontFamily" Value="{DynamicResource Mono}" />
+      <Setter Property="FontSize" Value="11" />
+    </Style>
+    <Style Selector="ComboBox /template/ Border#Background">
+      <Setter Property="Background" Value="{DynamicResource Base}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="ComboBox:pointerover /template/ Border#Background">
+      <Setter Property="Background" Value="{DynamicResource Raised}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Accent}" />
+    </Style>
+    <Style Selector="ComboBox /template/ Border#PopupBorder">
+      <Setter Property="Background" Value="{DynamicResource Surface}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource Line}" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+
+    <Style Selector="ScrollBar /template/ Border#TrackRect">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="ScrollBar /template/ Thumb">
+      <Setter Property="Background" Value="{DynamicResource Line}" />
+      <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style Selector="ScrollBar:pointerover /template/ Thumb">
+      <Setter Property="Background" Value="{DynamicResource Faint}" />
+    </Style>
+  </Window.Styles>
+
+  <Panel>
+    <Grid RowDefinitions="Auto,*,Auto">
+
+      <!-- header -->
+      <Border Grid.Row="0" Background="{DynamicResource Surface}" Padding="26,18,26,0"
+              BorderBrush="{DynamicResource Line}" BorderThickness="0,0,0,1">
+        <StackPanel>
+          <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+            <StackPanel Grid.Column="0" Spacing="4">
+              <TextBlock Text="IMMORTALITY" FontSize="23" FontWeight="Light" LetterSpacing="9"
+                         FontFamily="Georgia,Times New Roman,serif"
+                         Foreground="{DynamicResource Ink}" />
+              <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <TextBlock Classes="slug" Text="Clip Tracker" FontSize="11" LetterSpacing="3.5"
+                           Foreground="{DynamicResource Accent}" />
+                <TextBlock Classes="slug" Text="  by  " FontSize="11" LetterSpacing="3.5"
+                           Foreground="{DynamicResource Faint}" />
+                <Button Classes="link" Command="{Binding OpenUrlCommand}"
+                        CommandParameter="{Binding AuthorUrl}">
+                  <TextBlock Classes="slug" Text="{Binding Author}" FontSize="11"
+                             LetterSpacing="3.5" Foreground="{DynamicResource Muted}" />
+                </Button>
+              </StackPanel>
+            </StackPanel>
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="10"
+                        VerticalAlignment="Center" Margin="0,0,16,0">
+              <TextBlock Classes="eyebrow" Text="SECRETS" VerticalAlignment="Center" />
+              <ToggleButton Classes="switch" IsChecked="{Binding IncludeSecrets}"
+                            Margin="0,0,14,0" VerticalAlignment="Center" />
+              <TextBlock Classes="eyebrow" Text="SHOW ME" VerticalAlignment="Center" />
+              <ComboBox ItemsSource="{Binding SpoilerOptions}" SelectedItem="{Binding Spoilers}"
+                        MinWidth="158" CornerRadius="0" FontSize="12"
+                        Background="{DynamicResource Base}"
+                        BorderBrush="{DynamicResource Line}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="models:SpoilerOption">
+                    <TextBlock Text="{Binding Label}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+
+            <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8"
+                        VerticalAlignment="Center">
+              <Button Classes="ghost" Content="OPEN SAVE" Command="{Binding OpenSaveCommand}" />
+              <Button Classes="ghost" Content="RELOAD" Command="{Binding ReloadCommand}"
+                      IsEnabled="{Binding Loaded}" />
+              <Button Classes="ghost" Content="ABOUT" Command="{Binding ToggleHelpCommand}" />
+            </StackPanel>
+          </Grid>
+
+          <Grid Margin="0,18,0,0" ColumnDefinitions="Auto,*,Auto"
+                IsVisible="{Binding ShowHeaderTotals}">
+            <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="9">
+              <TextBlock Classes="slug" Text="{Binding WatchedCount}" FontSize="27"
+                         Foreground="{DynamicResource Ink}" />
+              <TextBlock Text="{Binding TotalCount, StringFormat='of {0} found'}" FontSize="12"
+                         Foreground="{DynamicResource Muted}"
+                         VerticalAlignment="Bottom" Margin="0,0,0,6" />
+            </StackPanel>
+
+            <ProgressBar Grid.Column="1" Margin="30,0" Height="4" CornerRadius="0"
+                         Minimum="0" Maximum="1" Value="{Binding Progress}"
+                         Foreground="{DynamicResource Accent}"
+                         Background="{DynamicResource Raised}" VerticalAlignment="Center" />
+
+            <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8"
+                        VerticalAlignment="Center">
+              <TextBlock Classes="slug" Text="{Binding Headline}" FontSize="12"
+                         Foreground="{DynamicResource Accent}" VerticalAlignment="Center" />
+              <TextBlock Classes="slug" Text="…or maybe not?" FontSize="12"
+                         VerticalAlignment="Center"
+                         Foreground="{DynamicResource Secret}"
+                         IsVisible="{Binding HiddenSecretsPending}" />
+            </StackPanel>
+          </Grid>
+
+          <Rectangle Height="1" Margin="0,16,0,0" StrokeThickness="2"
+                     Stroke="{DynamicResource Line}" StrokeDashArray="1,3" />
+        </StackPanel>
+      </Border>
+
+      <!-- browser -->
+      <Grid Grid.Row="1" ColumnDefinitions="230,*,368" IsVisible="{Binding ShowBrowser}">
+
+        <Border Grid.Column="0" Background="{DynamicResource Surface}"
+                BorderBrush="{DynamicResource Line}" BorderThickness="0,0,1,0" Padding="16">
+          <DockPanel LastChildFill="True">
+            <StackPanel DockPanel.Dock="Top" Spacing="18">
+              <Border BorderBrush="{DynamicResource Line}" BorderThickness="1">
+                <UniformGrid Columns="3">
+                  <RadioButton Classes="segment" GroupName="filter" Content="MISSING" IsChecked="True"
+                               Command="{Binding SetFilterCommand}" CommandParameter="Missing" />
+                  <RadioButton Classes="segment" GroupName="filter" Content="FOUND"
+                               Command="{Binding SetFilterCommand}" CommandParameter="Watched" />
+                  <RadioButton Classes="segment" GroupName="filter" Content="ALL"
+                               Command="{Binding SetFilterCommand}" CommandParameter="All" />
+                </UniformGrid>
+              </Border>
+              <TextBlock Classes="eyebrow" Text="MOVIES" Margin="2,0,0,0" />
+            </StackPanel>
+
+            <ListBox Classes="plain" Margin="0,10,0,0" ItemsSource="{Binding Movies}"
+                     SelectedItem="{Binding Movie}">
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:MovieSummary">
+                  <Border Classes="card" Padding="12,11">
+                    <Grid ColumnDefinitions="*,Auto,Auto">
+                      <TextBlock Text="{Binding Name}" FontSize="13"
+                                 Foreground="{DynamicResource Ink}" />
+                      <TextBlock Grid.Column="1" Classes="slug" Text="{Binding Tally}"
+                                 FontSize="11" VerticalAlignment="Center"
+                                 Foreground="{DynamicResource Muted}" />
+                      <TextBlock Grid.Column="2" Text="*" FontSize="15" Margin="3,0,0,0"
+                                 VerticalAlignment="Center"
+                                 Foreground="{DynamicResource Secret}"
+                                 IsVisible="{Binding HasHiddenSecrets}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
+          </DockPanel>
+        </Border>
+
+        <!-- clip list -->
+        <Grid Grid.Column="1" RowDefinitions="Auto,*">
+          <Grid Grid.Row="0" Margin="24,18,24,10" ColumnDefinitions="Auto,*,Auto">
+            <TextBlock Classes="eyebrow"
+                       Text="{Binding Clips.Count, StringFormat='{}{0} CLIPS'}" />
+            <TextBlock Grid.Column="2" Classes="eyebrow" Text="STATUS" />
+          </Grid>
+
+          <Panel Grid.Row="1">
+            <ListBox Classes="plain" Margin="24,0,24,18"
+                     ItemsSource="{Binding Clips}" SelectedItem="{Binding Selected}">
+              <ListBox.ItemTemplate>
+              <DataTemplate x:DataType="vm:ClipRow">
+                <Border Classes="card" Padding="0">
+                  <Grid ColumnDefinitions="3,52,*,Auto">
+
+                    <Rectangle Grid.Column="0" Fill="{DynamicResource Accent}"
+                               IsVisible="{Binding !Watched}" />
+                    <Rectangle Grid.Column="0" Fill="{DynamicResource Line}"
+                               IsVisible="{Binding Watched}" />
+
+                    <TextBlock Grid.Column="1" Classes="slug" Text="{Binding Id}" FontSize="15"
+                               Foreground="{DynamicResource Muted}"
+                               HorizontalAlignment="Center" VerticalAlignment="Center" />
+
+                    <StackPanel Grid.Column="2" Spacing="3" VerticalAlignment="Center"
+                                Margin="4,11,12,11">
+                      <TextBlock Text="{Binding Title}" FontSize="14"
+                                 Foreground="{DynamicResource Ink}" />
+                      <TextBlock Text="{Binding Meta}" FontSize="11.5"
+                                 Foreground="{DynamicResource Muted}"
+                                 TextTrimming="CharacterEllipsis" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="10"
+                                VerticalAlignment="Center" Margin="0,0,14,0">
+                      <TextBlock Classes="eyebrow" Text="SECRET" VerticalAlignment="Center"
+                                 Foreground="{DynamicResource Secret}"
+                                 IsVisible="{Binding SecretMark}" />
+                      <TextBlock Classes="eyebrow" Text="FOUND" VerticalAlignment="Center"
+                                 Foreground="{DynamicResource Found}"
+                                 IsVisible="{Binding Watched}" />
+                    </StackPanel>
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ListBox.ItemTemplate>
+            </ListBox>
+
+            <TextBlock Text="{Binding EmptyMessage}" FontSize="13"
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
+                       Foreground="{DynamicResource Faint}"
+                       IsVisible="{Binding ListIsEmpty}" />
+          </Panel>
+        </Grid>
+
+        <!-- detail -->
+        <Border Grid.Column="2" Background="{DynamicResource Surface}"
+                BorderBrush="{DynamicResource Line}" BorderThickness="1,0,0,0" Padding="24,20">
+          <ScrollViewer>
+            <StackPanel Spacing="20"
+                        IsVisible="{Binding Selected, Converter={x:Static ObjectConverters.IsNotNull}}">
+
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Classes="slug" Text="{Binding Selected.Id, StringFormat='CLIP {0}'}"
+                           FontSize="25" Foreground="{DynamicResource Accent}" />
+                <TextBlock Grid.Column="1" Classes="eyebrow" Text="SECRET" VerticalAlignment="Center"
+                           Foreground="{DynamicResource Secret}"
+                           IsVisible="{Binding Selected.SecretMark}" />
+              </Grid>
+
+              <TextBlock Text="{Binding Selected.Clip.Description}" FontSize="13.5"
+                         TextWrapping="Wrap" LineHeight="20"
+                         Foreground="{DynamicResource Ink}"
+                         IsVisible="{Binding ShowSelectedDetails}" />
+
+              <Button Classes="ghost" Content="REVEAL DETAILS" HorizontalAlignment="Left"
+                      Command="{Binding RevealDetailsCommand}"
+                      IsVisible="{Binding CanRevealDetails}" />
+
+              <!-- slate -->
+              <Border Background="{DynamicResource Base}" BorderBrush="{DynamicResource Line}"
+                      BorderThickness="1" Padding="15,13">
+                <Grid ColumnDefinitions="72,*" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+                  <StackPanel Grid.Row="0" Grid.ColumnSpan="2" IsVisible="{Binding ShowSelectedDetails}">
+                    <Grid ColumnDefinitions="72,*" RowDefinitions="Auto,Auto,Auto">
+                      <TextBlock Classes="slateKey" Text="MOVIE" />
+                      <TextBlock Grid.Column="1" Classes="slate" Text="{Binding Selected.MovieText}" />
+                      <TextBlock Grid.Row="1" Classes="slateKey" Text="TAKE" Margin="0,8,0,0" />
+                      <TextBlock Grid.Row="1" Grid.Column="1" Classes="slate" Margin="0,6,0,0"
+                                 Text="{Binding Selected.TakeText}" />
+                      <TextBlock Grid.Row="2" Classes="slateKey" Text="DATE" Margin="0,8,0,0" />
+                      <TextBlock Grid.Row="2" Grid.Column="1" Classes="slate" Margin="0,6,0,0"
+                                 Text="{Binding Selected.DateText}" />
+                    </Grid>
+                  </StackPanel>
+
+                  <TextBlock Grid.Row="1" Classes="slateKey" Text="KIND" Margin="0,8,0,0"
+                             IsVisible="{Binding ShowSelectedKind}" />
+                  <TextBlock Grid.Row="1" Grid.Column="1" Classes="slate" Margin="0,6,0,0"
+                             Text="{Binding Selected.KindText}"
+                             IsVisible="{Binding ShowSelectedKind}" />
+
+                  <TextBlock Grid.Row="2" Classes="slateKey" Text="STATUS" Margin="0,8,0,0" />
+                  <TextBlock Grid.Row="2" Grid.Column="1" Classes="slate" Margin="0,6,0,0"
+                             Text="{Binding Selected.StatusText}" />
+
+                  <TextBlock Grid.Row="3" Classes="slateKey" Text="WATCHED" Margin="0,8,0,0"
+                             IsVisible="{Binding Selected.HasViews}" />
+                  <TextBlock Grid.Row="3" Grid.Column="1" Classes="slate" Margin="0,6,0,0"
+                             Text="{Binding Selected.ViewsText}"
+                             IsVisible="{Binding Selected.HasViews}" />
+                </Grid>
+              </Border>
+
+              <StackPanel Spacing="10" IsVisible="{Binding ShowRoute}">
+                <TextBlock Classes="eyebrow" Text="HOW TO FIND IT" />
+                <ItemsControl ItemsSource="{Binding Selected.Clip.HowToFind}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Grid ColumnDefinitions="14,*" Margin="0,0,0,9">
+                        <TextBlock Classes="slug" Text="&#9656;" FontSize="12"
+                                   Foreground="{DynamicResource Accent}" />
+                        <TextBlock Grid.Column="1" Text="{Binding}" FontSize="13"
+                                   TextWrapping="Wrap" LineHeight="19"
+                                   Foreground="{DynamicResource Ink}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+
+              <StackPanel Spacing="10" IsVisible="{Binding CanReveal}">
+                <TextBlock Classes="eyebrow" Text="HOW TO FIND IT" />
+                <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="19"
+                           Foreground="{DynamicResource Faint}"
+                           Text="Hidden so you can keep hunting. Stuck on this one?" />
+                <Button Classes="ghost" Content="REVEAL THIS CLIP"
+                        Command="{Binding RevealCommand}" />
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </Border>
+      </Grid>
+
+      <!-- per-movie board -->
+      <ScrollViewer Grid.Row="1" Padding="40,34" IsVisible="{Binding ShowMovieBoard}">
+        <StackPanel Spacing="10" MaxWidth="620" HorizontalAlignment="Center">
+          <TextBlock Classes="eyebrow" Text="STILL TO FIND" HorizontalAlignment="Center"
+                     Margin="0,0,0,8" />
+          <ItemsControl ItemsSource="{Binding MovieBoard}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="vm:MovieSummary">
+                <Border Classes="card" Padding="18,15" Margin="0,0,0,8">
+                  <Grid ColumnDefinitions="*,Auto,Auto,Auto" RowDefinitions="Auto,Auto">
+                    <TextBlock Text="{Binding Name}" FontSize="15" VerticalAlignment="Center"
+                               Foreground="{DynamicResource Ink}" />
+                    <TextBlock Grid.Column="1" Classes="slug" Text="{Binding Remaining}"
+                               FontSize="20" Foreground="{DynamicResource Accent}"
+                               VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="2" Text="{Binding RemainingCaption}" FontSize="11"
+                               Margin="7,0,0,2" VerticalAlignment="Bottom"
+                               Foreground="{DynamicResource Muted}"
+                               IsVisible="{Binding HasCaption}" />
+                    <TextBlock Grid.Column="3" Text="*" FontSize="17" Margin="4,0,0,0"
+                               VerticalAlignment="Center"
+                               Foreground="{DynamicResource Secret}"
+                               IsVisible="{Binding HasHiddenSecrets}" />
+                    <ProgressBar Grid.Row="1" Grid.ColumnSpan="4" Margin="0,11,0,0"
+                                 Height="3" CornerRadius="0" Minimum="0" Maximum="1"
+                                 Value="{Binding Progress}"
+                                 Foreground="{DynamicResource Accent}"
+                                 Background="{DynamicResource Raised}" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+          <Button Classes="link" FontSize="12" Margin="0,6,0,0" HorizontalAlignment="Center"
+                  Content="Show which clip numbers they are"
+                  Command="{Binding ShowMoreCommand}" />
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- total only -->
+      <StackPanel Grid.Row="1" Spacing="6" VerticalAlignment="Center"
+                  HorizontalAlignment="Center" MaxWidth="430"
+                  IsVisible="{Binding ShowTotalBoard}">
+
+        <StackPanel Spacing="6" IsVisible="{Binding !Complete}">
+          <TextBlock Classes="slug" Text="{Binding MissingCount}" FontSize="96"
+                     HorizontalAlignment="Center" Foreground="{DynamicResource Accent}" />
+          <TextBlock Text="{Binding MissingCaption}" FontSize="14" HorizontalAlignment="Center"
+                     Foreground="{DynamicResource Ink}" />
+        </StackPanel>
+
+        <StackPanel Spacing="10" IsVisible="{Binding Complete}">
+          <TextBlock Text="All found" FontSize="52" LetterSpacing="3"
+                     FontFamily="Georgia,Times New Roman,serif"
+                     HorizontalAlignment="Center" Foreground="{DynamicResource Accent}" />
+          <TextBlock Text="…or maybe not?" FontSize="15" HorizontalAlignment="Center"
+                     FontFamily="Georgia,Times New Roman,serif"
+                     Foreground="{DynamicResource Secret}"
+                     IsVisible="{Binding ShowTease}" />
+        </StackPanel>
+
+        <ProgressBar Height="3" Margin="0,24,0,10" CornerRadius="0" Minimum="0" Maximum="1"
+                     Value="{Binding Progress}" Foreground="{DynamicResource Accent}"
+                     Background="{DynamicResource Raised}" />
+        <TextBlock Classes="slug" FontSize="12" HorizontalAlignment="Center"
+                   Foreground="{DynamicResource Muted}"
+                   Text="{Binding WatchedCount, StringFormat='{}{0} watched'}" />
+        <TextBlock FontSize="12" TextWrapping="Wrap" TextAlignment="Center" Margin="0,24,0,0"
+                   LineHeight="19" Foreground="{DynamicResource Faint}"
+                   Text="Nothing here spoils anything." />
+        <TextBlock FontSize="12" TextWrapping="Wrap" TextAlignment="Center"
+                   LineHeight="19" Foreground="{DynamicResource Faint}"
+                   Text="Open it up with Show me when you want more." />
+        <Button Classes="link" FontSize="12" HorizontalAlignment="Center" Margin="0,8,0,0"
+                Content="Break it down by movie" Command="{Binding ShowMoreCommand}" />
+      </StackPanel>
+
+      <!-- empty state -->
+      <StackPanel Grid.Row="1" Spacing="14" VerticalAlignment="Center"
+                  HorizontalAlignment="Center" MaxWidth="480"
+                  IsVisible="{Binding !Loaded}">
+        <TextBlock Text="No save loaded" FontSize="19" HorizontalAlignment="Center"
+                   Foreground="{DynamicResource Ink}" />
+        <TextBlock Text="{Binding Status}" FontSize="13" TextWrapping="Wrap"
+                   TextAlignment="Center" Foreground="{DynamicResource Muted}" />
+        <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+          <Button Classes="ghost" Content="OPEN SAVE" Command="{Binding OpenSaveCommand}" />
+          <Button Classes="ghost" Content="WHERE IS MY SAVE?" Command="{Binding ToggleHelpCommand}" />
+        </StackPanel>
+      </StackPanel>
+
+      <!-- status bar -->
+      <Border Grid.Row="2" Background="{DynamicResource Surface}" Padding="26,8"
+              BorderBrush="{DynamicResource Line}" BorderThickness="0,1,0,0">
+        <Grid ColumnDefinitions="*,Auto">
+          <Button Classes="link" HorizontalAlignment="Left" MaxWidth="900"
+                  Command="{Binding OpenSaveFolderCommand}"
+                  IsVisible="{Binding Loaded}"
+                  ToolTip.Tip="Open the folder this save is in">
+            <TextBlock Classes="slug" Text="{Binding SavePath}" FontSize="10"
+                       Foreground="{DynamicResource Faint}"
+                       TextTrimming="CharacterEllipsis" />
+          </Button>
+          <TextBlock Grid.Column="1" Classes="slug" Text="{Binding Status}" FontSize="10"
+                     Margin="16,0,0,0" Foreground="{DynamicResource Faint}" />
+        </Grid>
+      </Border>
+    </Grid>
+
+    <!-- vignette -->
+    <Border IsHitTestVisible="False">
+      <Border.Background>
+        <RadialGradientBrush GradientOrigin="50%,45%" Center="50%,45%"
+                             RadiusX="85%" RadiusY="85%">
+          <GradientStop Color="#00000000" Offset="0.45" />
+          <GradientStop Color="#59000000" Offset="1.0" />
+        </RadialGradientBrush>
+      </Border.Background>
+    </Border>
+
+    <!-- about -->
+    <Panel IsVisible="{Binding HelpVisible}">
+      <Border Background="#D8000000" />
+      <Border Classes="card" Padding="0" MaxWidth="660" MaxHeight="660"
+              Margin="24" HorizontalAlignment="Center" VerticalAlignment="Center">
+        <Grid RowDefinitions="Auto,*,Auto">
+
+          <Grid Grid.Row="0" ColumnDefinitions="*,Auto" Margin="28,24,22,0">
+            <StackPanel Spacing="4">
+              <TextBlock Text="About" FontSize="19"
+                         FontFamily="Georgia,Times New Roman,serif"
+                         Foreground="{DynamicResource Ink}" />
+              <TextBlock Classes="eyebrow" Text="AND WHO IT IS BUILT ON" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="ghost" Content="CLOSE" Padding="13,6"
+                    Command="{Binding CloseHelpCommand}" />
+          </Grid>
+
+          <ScrollViewer Grid.Row="1" Margin="28,22,12,8" Padding="0,0,16,0">
+            <StackPanel Spacing="26">
+
+              <ItemsControl ItemsSource="{Binding Summary}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate>
+                    <TextBlock Text="{Binding}" FontSize="13.5" TextWrapping="Wrap"
+                               LineHeight="22" Margin="0,0,0,14"
+                               Foreground="{DynamicResource Ink}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+
+              <Rectangle Height="1" StrokeThickness="2" Stroke="{DynamicResource Line}"
+                         StrokeDashArray="1,3" />
+
+              <StackPanel Spacing="12">
+                <TextBlock Classes="eyebrow" Text="STANDING ON" />
+                <ItemsControl ItemsSource="{Binding Credits}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="models:Credit">
+                      <Border Background="{DynamicResource Base}"
+                              BorderBrush="{DynamicResource Line}" BorderThickness="1"
+                              Padding="16,14" Margin="0,0,0,10">
+                        <StackPanel Spacing="8">
+                          <TextBlock Text="{Binding Gave}" FontSize="13"
+                                     Foreground="{DynamicResource Accent}" />
+                          <TextBlock Text="{Binding Detail}" FontSize="12" TextWrapping="Wrap"
+                                     LineHeight="19" Foreground="{DynamicResource Muted}" />
+                          <Button Classes="link" FontSize="11" Content="Open on Steam"
+                                  Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).OpenUrlCommand}"
+                                  CommandParameter="{Binding Url}" />
+                          <StackPanel Spacing="4" Margin="0,4,0,0" IsVisible="{Binding HasDerived}">
+                            <TextBlock Text="{Binding Derived}" FontSize="11" TextWrapping="Wrap"
+                                       Foreground="{DynamicResource Faint}" />
+                            <Button Classes="link" FontSize="11" Content="Open that one too"
+                                    Command="{Binding $parent[ItemsControl].((vm:MainViewModel)DataContext).OpenUrlCommand}"
+                                    CommandParameter="{Binding DerivedUrl}" />
+                          </StackPanel>
+                        </StackPanel>
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+
+              <Rectangle Height="1" StrokeThickness="2" Stroke="{DynamicResource Line}"
+                         StrokeDashArray="1,3" />
+
+              <StackPanel Spacing="12">
+                <TextBlock Classes="eyebrow" Text="FINDING YOUR SAVE" />
+                <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{DynamicResource Ink}"
+                           Text="Quit the game first, or the save on disk will be out of date. Then press Reload." />
+                <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{DynamicResource Muted}"
+                           Text="These are the folders checked, in order:" />
+                <ItemsControl ItemsSource="{Binding SaveFolders}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                      <Border Background="{DynamicResource Base}" Padding="11,8" Margin="0,0,0,5">
+                        <TextBlock Classes="slug" Text="{Binding}" FontSize="11"
+                                   TextWrapping="Wrap" Foreground="{DynamicResource Muted}" />
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock FontSize="13" TextWrapping="Wrap" LineHeight="21"
+                           Foreground="{DynamicResource Ink}"
+                           Text="Still nothing? Steam keeps a copy in the cloud. Download SaveGame.abr, then drop it beside this app or use Open save." />
+                <Button Classes="link" FontSize="12" Content="Open your Steam Cloud save storage"
+                        Command="{Binding OpenUrlCommand}"
+                        CommandParameter="{Binding SteamCloudUrl}" />
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+
+          <StackPanel Grid.Row="2" Spacing="9" Margin="28,14,28,20">
+            <Rectangle Height="1" StrokeThickness="2" Stroke="{DynamicResource Line}"
+                       StrokeDashArray="1,3" />
+            <TextBlock Classes="eyebrow" TextWrapping="Wrap" Text="{Binding Disclaimer}" />
+            <Grid ColumnDefinitions="Auto,*,Auto,Auto">
+              <Button Classes="link" Command="{Binding OpenUrlCommand}"
+                      CommandParameter="{Binding SourceUrl}">
+                <TextBlock Classes="eyebrow" Text="SOURCE CODE"
+                           Foreground="{DynamicResource Accent}" />
+              </Button>
+              <TextBlock Grid.Column="2" Classes="eyebrow" Text="MADE BY"
+                         VerticalAlignment="Center" Margin="0,0,7,0" />
+              <Button Grid.Column="3" Classes="link" Command="{Binding OpenUrlCommand}"
+                      CommandParameter="{Binding AuthorUrl}">
+                <TextBlock Classes="eyebrow" Text="{Binding Author}"
+                           Foreground="{DynamicResource Accent}" />
+              </Button>
+            </Grid>
+          </StackPanel>
+        </Grid>
+      </Border>
+    </Panel>
+  </Panel>
+</Window>

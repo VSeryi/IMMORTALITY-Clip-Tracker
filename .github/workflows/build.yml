@@ -1,0 +1,154 @@
+name: build
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  PROJECT: src/ImmortalityClipTracker/ImmortalityClipTracker.csproj
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+
+jobs:
+  build:
+    name: ${{ matrix.label }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: windows-x64
+            rid: win-x64
+          - os: macos-latest
+            label: macos-arm64
+            rid: osx-arm64
+          - os: macos-15-intel
+            label: macos-x64
+            rid: osx-x64
+          - os: ubuntu-latest
+            label: linux-x64
+            rid: linux-x64
+
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+          cache: true
+          cache-dependency-path: src/ImmortalityClipTracker/ImmortalityClipTracker.csproj
+
+      # Tag v1.2.3 -> assembly version 1.2.3; untagged builds stay at 0.0.0.
+      - name: Resolve version
+        id: version
+        shell: bash
+        run: |
+          ref='${{ github.ref }}'
+          if [[ "$ref" == refs/tags/v* ]]; then
+            echo "value=${ref#refs/tags/v}" >> "$GITHUB_OUTPUT"
+          else
+            echo "value=0.0.0" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Publish
+        run: >
+          dotnet publish ${{ env.PROJECT }}
+          -c Release
+          -r ${{ matrix.rid }}
+          -p:Version=${{ steps.version.outputs.value }}
+          -o publish
+
+      - name: Stage (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory out | Out-Null
+          Move-Item publish/ImmortalityClipTracker.exe out/ImmortalityClipTracker-${{ matrix.label }}.exe
+
+      - name: Stage (Linux)
+        if: runner.os == 'Linux'
+        run: |
+          mkdir out
+          mv publish/ImmortalityClipTracker out/ImmortalityClipTracker-${{ matrix.label }}
+          chmod +x out/ImmortalityClipTracker-${{ matrix.label }}
+
+      # macOS only treats it as a GUI program inside a real .app bundle, and a
+      # bundle is a folder, so it has to be delivered inside a disk image.
+      - name: Stage (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          mkdir out stage
+          APP="stage/ImmortalityClipTracker.app"
+          mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
+          mv publish/ImmortalityClipTracker "$APP/Contents/MacOS/"
+          chmod +x "$APP/Contents/MacOS/ImmortalityClipTracker"
+          cat > "$APP/Contents/Info.plist" <<PLIST
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>CFBundleName</key><string>IMMORTALITY Clip Tracker</string>
+            <key>CFBundleDisplayName</key><string>IMMORTALITY Clip Tracker</string>
+            <key>CFBundleIdentifier</key><string>io.github.vseryi.immortalitycliptracker</string>
+            <key>CFBundleVersion</key><string>${{ steps.version.outputs.value }}</string>
+            <key>CFBundleShortVersionString</key><string>${{ steps.version.outputs.value }}</string>
+            <key>CFBundlePackageType</key><string>APPL</string>
+            <key>CFBundleExecutable</key><string>ImmortalityClipTracker</string>
+            <key>LSMinimumSystemVersion</key><string>12.0</string>
+            <key>NSHighResolutionCapable</key><true/>
+          </dict>
+          </plist>
+          PLIST
+          ln -s /Applications stage/Applications
+          hdiutil create \
+            -volname "IMMORTALITY Clip Tracker" \
+            -srcfolder stage \
+            -ov -format UDZO \
+            "out/ImmortalityClipTracker-${{ matrix.label }}.dmg"
+
+      # archive: false uploads the binary as-is instead of wrapping it in a zip.
+      # It only accepts a single file, and names the artifact after it.
+      - uses: actions/upload-artifact@v7
+        with:
+          path: out/*
+          archive: false
+          if-no-files-found: error
+
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@v3
+        with:
+          files: artifacts/*
+          generate_release_notes: true
+          body: |
+            Download the build for your platform below. Each one is a single
+            self-contained file — no runtime, no installer.
+
+            - **Windows** — `ImmortalityClipTracker-windows-x64.exe`
+            - **macOS** — `ImmortalityClipTracker-macos-arm64.dmg` (Apple Silicon)
+              or `-macos-x64.dmg` (Intel); open it and drag the app to Applications
+            - **Linux** — `ImmortalityClipTracker-linux-x64`, then `chmod +x`
+
+            > macOS and Linux builds are unsigned. On macOS, right-click the app
+            > and choose Open the first time.

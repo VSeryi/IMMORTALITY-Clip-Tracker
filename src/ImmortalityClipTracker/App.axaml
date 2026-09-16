@@ -1,0 +1,25 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="ImmortalityClipTracker.App"
+             RequestedThemeVariant="Dark">
+
+  <Application.Styles>
+    <FluentTheme />
+  </Application.Styles>
+
+  <Application.Resources>
+    <!-- Projection booth: black leader, sepia print, aged gold. -->
+    <SolidColorBrush x:Key="Base"    Color="#0A0908" />
+    <SolidColorBrush x:Key="Surface" Color="#111010" />
+    <SolidColorBrush x:Key="Raised"  Color="#1B1917" />
+    <SolidColorBrush x:Key="Line"    Color="#2B2622" />
+    <SolidColorBrush x:Key="Ink"     Color="#EDE3D1" />
+    <SolidColorBrush x:Key="Muted"   Color="#948A7A" />
+    <SolidColorBrush x:Key="Faint"   Color="#5D554B" />
+    <SolidColorBrush x:Key="Accent"  Color="#D8A34A" />
+    <SolidColorBrush x:Key="Secret"  Color="#C4614F" />
+    <SolidColorBrush x:Key="Found"   Color="#8A9A72" />
+
+    <FontFamily x:Key="Mono">Consolas,Menlo,DejaVu Sans Mono,monospace</FontFamily>
+  </Application.Resources>
+</Application>

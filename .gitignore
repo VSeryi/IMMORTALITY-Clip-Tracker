@@ -1,0 +1,21 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+publish/
+dist/
+artifacts/
+
+# IDE / tooling
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.DotSettings.user
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# Never commit a personal save
+*.abr
