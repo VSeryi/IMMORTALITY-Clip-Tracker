@@ -19,3 +19,7 @@ Thumbs.db
 
 # Never commit a personal save
 *.abr
+
+# Copied in by the Pages workflow (and by hand for local preview)
+web/Immortality_Guide.csv
+web/icon.png

@@ -8,6 +8,10 @@ each one.
 
 Windows, macOS and Linux. One self-contained file, nothing to install.
 
+There is also a **[browser version](https://vseryi.github.io/IMMORTALITY-Clip-Tracker/)** —
+same tracker, nothing to download. Your save is read inside the page and never
+leaves your machine.
+
 > Heavy spoilers: the clip guide describes every scene in the game. The app
 > starts fully guarded and only reveals as much as you ask it to.
 
@@ -134,11 +138,33 @@ src/ImmortalityClipTracker/
   ViewModels/  MainViewModel
   Views/       MainWindow
   Assets/      icon, clip guide
+web/                  the browser version — plain HTML, CSS and JS
 tools/make-icon.ps1   regenerates icon.ico and icon.png
 ```
 
 Drop an updated `Immortality_Guide.csv` next to the executable to override the
 bundled copy.
+
+### The browser version
+
+`web/` is the same tracker with the NRBF reader and the realignment ported to
+JavaScript. No framework, no build step, no dependencies. It reads the save with
+`File.arrayBuffer()`, so nothing is uploaded and the page works offline once
+loaded.
+
+The clip guide and the icon are not duplicated there — the Pages workflow copies
+them out of `src/ImmortalityClipTracker/Assets/` at deploy time, so there is one
+source of truth. To preview locally, copy them in yourself (they are gitignored)
+and serve the folder over HTTP:
+
+```bash
+cp src/ImmortalityClipTracker/Assets/Immortality_Guide.csv src/ImmortalityClipTracker/Assets/icon.png web/
+npx http-server web -p 8099 -c-1
+```
+
+Deployment runs on every push to `main` that touches `web/` or the assets.
+GitHub Pages must be set to **Source: GitHub Actions** in the repository
+settings.
 
 ## Credits
 

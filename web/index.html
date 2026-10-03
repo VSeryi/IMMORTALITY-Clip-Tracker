@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IMMORTALITY Clip Tracker</title>
+<meta name="description" content="Reads your IMMORTALITY save in the browser and shows which clips you have not watched yet. Spoiler-free by default. Nothing is uploaded.">
+<meta name="color-scheme" content="dark">
+<link rel="icon" href="icon.png">
+<link rel="stylesheet" href="style.css">
+<meta property="og:title" content="IMMORTALITY Clip Tracker">
+<meta property="og:description" content="Which clips have you missed? Drop your save in and find out. Spoiler-free by default, and nothing leaves your browser.">
+<meta property="og:type" content="website">
+</head>
+<body>
+
+<header class="bar">
+  <div class="wordmark">
+    <h1>IMMORTALITY</h1>
+    <p class="slug">Clip Tracker <span class="dim">by</span>
+      <a href="https://steamcommunity.com/id/xxseryixx/" target="_blank" rel="noopener">XxSeRyIxX</a>
+    </p>
+  </div>
+
+  <div class="controls" hidden id="controls">
+    <label class="field">
+      <span class="eyebrow">Secrets</span>
+      <button id="secrets" class="switch" role="switch" aria-checked="false">
+        <span class="knob"></span>
+      </button>
+    </label>
+    <label class="field">
+      <span class="eyebrow">Show me</span>
+      <select id="level">
+        <option value="0">Total only</option>
+        <option value="1">Per movie</option>
+        <option value="2">Clip numbers</option>
+        <option value="3">Clip details</option>
+        <option value="4">Everything</option>
+      </select>
+    </label>
+    <button id="reset" class="ghost">New save</button>
+  </div>
+
+  <button id="about-open" class="ghost">About</button>
+</header>
+
+<main>
+
+  <!-- drop zone -->
+  <section id="intro">
+    <div id="drop" class="drop">
+      <p class="big">Drop your save here</p>
+      <p class="muted">or <label class="link" for="file">choose a file</label><input id="file" type="file" accept=".abr" hidden></p>
+      <p class="eyebrow mt">SaveGame.abr &middot; read in your browser &middot; never uploaded</p>
+    </div>
+    <p id="error" class="error" hidden></p>
+
+    <div class="cols">
+      <div>
+        <h2 class="eyebrow">Where is my save?</h2>
+        <p>Quit the game first, or the save on disk will be out of date.</p>
+        <ul class="paths">
+          <li><b>Windows</b><code>%USERPROFILE%\AppData\LocalLow\Half Mermaid Productions\Immortality\&lt;steam-id&gt;\</code></li>
+          <li><b>macOS</b><code>~/Library/Application Support/Half Mermaid Productions/Immortality/</code></li>
+          <li><b>Linux</b><code>~/.config/unity3d/Half Mermaid Productions/Immortality/</code></li>
+        </ul>
+        <p>Can't find it? Steam keeps a copy:
+          <a href="https://store.steampowered.com/account/remotestorageapp/?appid=1350200" target="_blank" rel="noopener">download it from Steam Cloud</a>.</p>
+      </div>
+      <div>
+        <h2 class="eyebrow">Spoiler-free by default</h2>
+        <p>This page opens at the most guarded setting: a single number, nothing else.
+           You decide how much more it reveals, one step at a time.</p>
+        <h2 class="eyebrow mt">Prefer a desktop app?</h2>
+        <p>Same tool, installable, finds the save on its own.</p>
+        <p><a href="https://github.com/VSeryi/IMMORTALITY-Clip-Tracker/releases" target="_blank" rel="noopener">Download for Windows, macOS or Linux</a></p>
+      </div>
+    </div>
+  </section>
+
+  <!-- results -->
+  <section id="results" hidden>
+    <div id="totals" class="totals">
+      <div class="count">
+        <strong id="watched">0</strong>
+        <span id="of-total" class="muted"></span>
+      </div>
+      <div class="meter"><i id="meter-fill"></i></div>
+      <p id="headline" class="headline"></p>
+    </div>
+
+    <!-- total only -->
+    <div id="board-total" class="board" hidden>
+      <p id="big-number" class="hero"></p>
+      <p id="big-caption"></p>
+      <div class="meter wide"><i id="hero-fill"></i></div>
+      <p id="hero-watched" class="muted slug"></p>
+      <p class="dim mt">Nothing here spoils anything.</p>
+      <p class="dim">Open it up with <b>Show me</b> when you want more.</p>
+      <p><button class="link" data-more>Break it down by movie</button></p>
+    </div>
+
+    <!-- per movie -->
+    <div id="board-movies" class="board" hidden>
+      <h2 class="eyebrow center">Still to find</h2>
+      <div id="movie-cards"></div>
+      <p><button class="link" data-more>Show which clip numbers they are</button></p>
+    </div>
+
+    <!-- browser -->
+    <div id="browser" class="browser" hidden>
+      <aside>
+        <div class="segmented" id="filters">
+          <button data-filter="missing" class="on">Missing</button>
+          <button data-filter="found">Found</button>
+          <button data-filter="all">All</button>
+        </div>
+        <h2 class="eyebrow">Movies</h2>
+        <ul id="movie-list"></ul>
+      </aside>
+      <div class="listing">
+        <h2 class="eyebrow" id="clip-count"></h2>
+        <ul id="clips"></ul>
+        <p id="empty" class="dim center" hidden></p>
+      </div>
+      <aside class="detail" id="detail"></aside>
+    </div>
+  </section>
+</main>
+
+<dialog id="about">
+  <h2>About</h2>
+  <p class="eyebrow">and who it is built on</p>
+
+  <p>IMMORTALITY never tells you which clips you have already seen. There is no list,
+     no counter, and no way to know what is left.</p>
+  <p>This page works it out from your own save file. The file is read inside your
+     browser &mdash; it is never uploaded, and no part of it is sent anywhere.</p>
+  <p>It exists because other people solved the hard parts first and published what
+     they found.</p>
+
+  <hr>
+
+  <h3 class="eyebrow">Standing on</h3>
+  <div class="credit">
+    <b>The clip list</b>
+    <p>A spreadsheet of every clip with its take, its date, and the objects you can
+       match-cut from. It is the guide this page ships with.</p>
+    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3342793414" target="_blank" rel="noopener">Open on Steam</a>
+    <p class="dim">Built in turn on the community completionist guide.
+      <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2860754029" target="_blank" rel="noopener">Open that one too</a>
+    </p>
+  </div>
+  <div class="credit">
+    <b>Reading the save</b>
+    <p>Worked out that SaveGame.abr holds your view history, and showed how to get the
+       watched clip IDs out of it.</p>
+    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3731545899" target="_blank" rel="noopener">Open on Steam</a>
+  </div>
+  <div class="credit">
+    <b>The idea</b>
+    <p>The original &ldquo;which videos have I actually seen?&rdquo; counter, and the
+       reason any of this exists.</p>
+    <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3204009205" target="_blank" rel="noopener">Open on Steam</a>
+  </div>
+
+  <hr>
+  <p class="eyebrow">Free software under the GNU AGPL v3. Not affiliated with Half Mermaid or Sam Barlow.</p>
+  <p><a href="https://github.com/VSeryi/IMMORTALITY-Clip-Tracker" target="_blank" rel="noopener">Source code</a></p>
+  <form method="dialog"><button class="ghost">Close</button></form>
+</dialog>
+
+<script src="app.js"></script>
+</body>
+</html>
