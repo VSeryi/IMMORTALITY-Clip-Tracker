@@ -19,7 +19,27 @@ Source code: https://github.com/VSeryi/IMMORTALITY-Clip-Tracker
 
 The licence above covers the application code.
 
-Immortality_Guide.csv is community-authored clip data, reproduced with thanks
-from the Steam guides listed in the README. IMMORTALITY is a trademark of its
-respective owners; this project is not affiliated with Half Mermaid or Sam
-Barlow.
+app/clips.json is generated from IMMORTALITY's own data files. The clip titles,
+lines of dialogue and object names in it are copyright (c) Half Mermaid
+Productions. They are NOT covered by the GNU AGPL above. They are included only
+as the short references a tracker needs to name one clip apart from another.
+
+IMMORTALITY is a trademark of its respective owners; this project is not
+affiliated with Half Mermaid or Sam Barlow.
+
+app/pictures.bin contains low-resolution frames from IMMORTALITY, copyright (c)
+Half Mermaid Productions, all rights reserved. They are NOT covered by the GNU
+AGPL above and are NOT licensed for redistribution. They are included only as
+small pictures so the tracker can tell one clip from another and show where a
+match-cut starts.
+
+They are packed into a single archive rather than left loose because the game
+contains nudity and heavy spoilers, and a folder of its frames is neither a
+reasonable thing to browse by accident nor to have rendered in a repository.
+That is packaging, not protection.
+
+A fork may take the code under the AGPL. It may not take those images under it.
+
+If you are the rights holder and want them gone, open an issue at
+https://github.com/VSeryi/IMMORTALITY-Clip-Tracker and they will be removed
+immediately, no questions asked. See app/pictures.txt.

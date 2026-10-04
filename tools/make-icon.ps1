@@ -1,6 +1,8 @@
 Add-Type -AssemblyName System.Drawing
 
-$out = Join-Path $PSScriptRoot '..\src\ImmortalityClipTracker\Assets'
+# The PNG is a web asset, the ICO is only used by the Windows shell.
+$web = Join-Path $PSScriptRoot '..\app'
+$out = Join-Path $PSScriptRoot '..\shell'
 $amber = [Drawing.Color]::FromArgb(216, 163, 74)
 
 function New-Reel([int]$size) {
@@ -67,7 +69,7 @@ function ConvertTo-Png($bmp) {
 }
 
 $png = New-Reel 256
-$png.Save((Join-Path $out 'icon.png'), [Drawing.Imaging.ImageFormat]::Png)
+$png.Save((Join-Path $web 'icon.png'), [Drawing.Imaging.ImageFormat]::Png)
 $png.Dispose()
 
 $sizes = 16, 20, 24, 32, 40, 48, 64, 128, 256
@@ -94,4 +96,4 @@ $w.Flush()
 [IO.File]::WriteAllBytes((Join-Path $out 'icon.ico'), $ico.ToArray())
 $w.Dispose()
 
-'icon.ico and icon.png written'
+'icon.ico written to shell/, icon.png written to app/'

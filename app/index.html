@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>IMMORTALITY Clip Tracker</title>
+<meta name="description" content="Reads your IMMORTALITY save and shows which clips you have not watched yet. Spoiler-free by default. Nothing is uploaded.">
+<meta name="color-scheme" content="dark">
+<meta name="theme-color" content="#0a0908">
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" href="icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="stylesheet" href="style.css">
+<meta property="og:title" content="IMMORTALITY Clip Tracker">
+<meta property="og:description" content="Which clips have you missed? Drop your save in and find out. Spoiler-free by default, and nothing leaves your browser.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="icon.png">
+</head>
+<body>
+<script>
+  // Runs before the first paint. The desktop build opens a save by itself, so
+  // without this the drop zone appears for a moment and is then replaced.
+  if (typeof window.external === 'object' && typeof window.external.receiveMessage === 'function') {
+    document.documentElement.classList.add('booting');
+  }
+</script>
+
+<header class="bar">
+  <div class="wordmark">
+    <h1>IMMORTALITY</h1>
+    <p class="slug">Clip Tracker <span class="dim">by</span>
+      <a href="https://steamcommunity.com/id/xxseryixx/" target="_blank" rel="noopener">XxSeRyIxX</a>
+    </p>
+  </div>
+
+  <div class="controls" hidden id="controls">
+    <label class="field">
+      <span class="eyebrow">Secrets</span>
+      <button id="secrets" class="switch" role="switch" aria-checked="false" aria-label="Include secret clips">
+        <span class="knob"></span>
+      </button>
+    </label>
+    <label class="field">
+      <span class="eyebrow">Show me</span>
+      <select id="level">
+        <option value="0">Total only</option>
+        <option value="1">Per movie</option>
+        <option value="2">Clip numbers</option>
+        <option value="3">Clip details</option>
+        <option value="4">Everything</option>
+      </select>
+    </label>
+    <button id="reset" class="ghost">Open save</button>
+    <button id="refresh" class="ghost" hidden>Reload</button>
+  </div>
+
+  <button id="back" class="ghost" hidden>Back</button>
+
+  <button id="about-open" class="ghost">About</button>
+  <button id="install" class="ghost primary">Get the app</button>
+</header>
+
+<div id="toast" class="toast" role="alert" hidden>
+  <div class="toast-body">
+    <strong id="toast-title"></strong>
+    <span id="toast-hint"></span>
+  </div>
+  <button id="toast-close" class="icon" aria-label="Dismiss">&#10005;</button>
+</div>
+
+<button id="to-top" class="to-top" type="button" aria-label="Back to the top" title="Back to the top" hidden>
+  <svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 5l4-4 4 4"/></svg>
+</button>
+
+<main>
+
+  <p id="boot" class="busy"><span class="spinner"></span> Looking for your save&hellip;</p>
+
+  <!-- drop zone -->
+  <section id="intro">
+    <div id="drop" class="drop">
+      <p class="big">Drop your save here</p>
+      <p class="muted">or <button type="button" id="choose" class="link">choose a file</button><input id="file" type="file" accept=".abr" hidden></p>
+      <p class="eyebrow mt">SaveGame.abr &middot; read on your own machine &middot; never uploaded</p>
+      <p class="mt" id="again-wrap" hidden>
+        <button id="again" class="ghost primary"></button>
+      </p>
+    </div>
+
+    <p id="busy" class="busy" hidden><span class="spinner"></span> Reading your save&hellip;</p>
+
+    <div class="cols">
+      <div>
+        <h2 class="eyebrow">Where is my save?</h2>
+        <ul class="paths">
+          <li><b>Windows</b><code>%USERPROFILE%\AppData\LocalLow\Half Mermaid Productions\Immortality\&lt;steam-id&gt;\</code></li>
+          <li><b>macOS</b><code>~/Library/Application Support/Half Mermaid Productions/Immortality/</code></li>
+          <li><b>Linux</b><code>~/.config/unity3d/Half Mermaid Productions/Immortality/</code></li>
+          <li><b>Steam Deck / Proton</b><code>~/.steam/steam/steamapps/compatdata/1350200/pfx/drive_c/users/steamuser/AppData/LocalLow/Half Mermaid Productions/Immortality/</code></li>
+        </ul>
+        <p class="dim">Can't find it? Steam keeps a copy:
+          <a href="https://store.steampowered.com/account/remotestorageapp/?appid=1350200" target="_blank" rel="noopener">download it from Steam Cloud</a>.</p>
+      </div>
+      <div>
+        <h2 class="eyebrow">Spoiler-free by default</h2>
+        <p>This page opens at the most guarded setting: a single number, nothing else.
+           You decide how much more it reveals, one step at a time.</p>
+        <h2 class="eyebrow mt">Nothing leaves your machine</h2>
+        <p>The save is read here, in the page. It is never uploaded, and no part of
+           it is sent anywhere.</p>
+        <div id="desktop-offer">
+          <h2 class="eyebrow mt">Prefer a desktop app?</h2>
+          <p>Same tracker, installable, and it finds the save on its own.</p>
+          <p><a href="https://github.com/VSeryi/IMMORTALITY-Clip-Tracker/releases" target="_blank" rel="noopener">Download for Windows, macOS or Linux</a></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- results -->
+  <section id="results" hidden>
+    <div id="totals" class="totals">
+      <div class="count">
+        <strong id="watched">0</strong>
+        <span id="of-total" class="muted"></span>
+      </div>
+      <div class="meter"><i id="meter-fill"></i></div>
+      <p id="headline" class="headline"></p>
+    </div>
+
+    <!-- total only -->
+    <div id="board-total" class="board" hidden>
+      <p id="big-number" class="hero"></p>
+      <p id="big-caption"></p>
+      <div class="meter wide"><i id="hero-fill"></i></div>
+      <p id="hero-watched" class="muted slug"></p>
+      <p class="dim mt">Nothing here spoils anything.</p>
+      <p class="dim">Open it up with <b>Show me</b> when you want more.</p>
+      <p><button class="link" data-more>Break it down by movie</button></p>
+    </div>
+
+    <!-- per movie -->
+    <div id="board-movies" class="board" hidden>
+      <h2 class="eyebrow center">Still to find</h2>
+      <div id="movie-cards"></div>
+      <p><button class="link" data-more>Show which clip numbers they are</button></p>
+    </div>
+
+    <!-- browser -->
+    <div id="browser" class="browser" hidden>
+      <aside>
+        <div class="segmented" id="filters">
+          <button type="button" data-filter="missing" aria-pressed="true">Missing</button>
+          <button type="button" data-filter="found" aria-pressed="false">Found</button>
+          <button type="button" data-filter="all" aria-pressed="false">All</button>
+        </div>
+        <h2 class="eyebrow">Movies</h2>
+        <ul id="movie-list"></ul>
+      </aside>
+      <div class="listing">
+        <h2 class="eyebrow" id="clip-count"></h2>
+        <ul id="clips"></ul>
+        <p id="empty" class="dim center" hidden></p>
+        <p class="dim center mt">Use <b>&uarr;</b> and <b>&darr;</b> to move through the list.</p>
+      </div>
+      <aside class="detail pane" id="detail"></aside>
+    </div>
+  </section>
+</main>
+
+<dialog id="about" class="sheet">
+  <div class="sheet-head">
+    <div>
+      <h2>About</h2>
+      <p class="eyebrow">and who it is built on</p>
+    </div>
+    <button class="icon" data-close aria-label="Close">&#10005;</button>
+  </div>
+
+  <div class="sheet-body">
+    <p>IMMORTALITY never tells you which clips you have already seen. There is no list,
+       no counter, and no way to know what is left.</p>
+    <p>This works it out from your own save file. The file is read on your own
+       machine. It is never uploaded, and no part of it is sent anywhere.</p>
+    <p>It exists because other people solved the hard parts first and published what
+       they found.</p>
+
+    <h3 class="eyebrow section">Standing on</h3>
+    <div class="credit">
+      <b>The clip list</b>
+      <p>The guide that first mapped every clip with its take and its date.
+         Everything shown here is now read out of the game itself, and agrees
+         with 781 of the 792 match-cuts this guide lists.</p>
+      <p>
+        <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3342793414" target="_blank" rel="noopener">Open on Steam</a>
+        &middot;
+        <a href="https://steamcommunity.com/sharedfiles/filedetails/?id=2860754029" target="_blank" rel="noopener">the completionist guide it came from</a>
+      </p>
+    </div>
+    <div class="credit">
+      <b>Reading the save</b>
+      <p>Worked out that SaveGame.abr holds your view history, and showed how to get
+         the watched clip IDs out of it.</p>
+      <p><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3731545899" target="_blank" rel="noopener">Open on Steam</a></p>
+    </div>
+    <div class="credit">
+      <b>The idea</b>
+      <p>The original &ldquo;which videos have I actually seen?&rdquo; counter, and the
+         reason any of this exists.</p>
+      <p><a href="https://steamcommunity.com/sharedfiles/filedetails/?id=3204009205" target="_blank" rel="noopener">Open on Steam</a></p>
+    </div>
+
+    <h3 class="eyebrow section">Licence</h3>
+    <p>Free software under the GNU AGPL v3. Not affiliated with Half Mermaid or Sam Barlow.</p>
+    <p>The pictures are frames from IMMORTALITY, &copy; Half Mermaid Productions, shown
+       here only so you can tell one clip from another and see where to click. They are
+       not covered by that licence, and will be removed on request. The film contains
+       nudity and violence; the frames are taken from it, and are only shown once you
+       have opened the tracker up past <b>Clip numbers</b>.</p>
+    <p><a href="https://github.com/VSeryi/IMMORTALITY-Clip-Tracker" target="_blank" rel="noopener">Source code on GitHub</a></p>
+  </div>
+</dialog>
+
+<dialog id="get" class="sheet">
+  <div class="sheet-head">
+    <div>
+      <h2>Get the app</h2>
+      <p class="eyebrow">two ways to keep it</p>
+    </div>
+    <button class="icon" data-close aria-label="Close">&#10005;</button>
+  </div>
+
+  <div class="sheet-body">
+    <div class="credit">
+      <b>Install this page</b>
+      <p>Adds it to your desktop or home screen and keeps working offline. Nothing to
+         download, and it updates itself.</p>
+      <p><button id="install-now" class="ghost primary">Install</button></p>
+      <p class="dim" id="install-note">Your browser decides when to offer this. If the
+         button does nothing, use your browser menu. In Chrome and Edge it is
+         <b>Install this site as an app</b>.</p>
+    </div>
+
+    <div class="credit">
+      <b>Download the desktop app</b>
+      <p>Finds your save on its own, with no folder prompts. Windows, macOS and Linux,
+         one self-contained file.</p>
+      <p><a class="ghost" href="https://github.com/VSeryi/IMMORTALITY-Clip-Tracker/releases" target="_blank" rel="noopener">Open the releases page</a></p>
+    </div>
+  </div>
+</dialog>
+
+<dialog id="warn" class="sheet">
+  <div class="sheet-head">
+    <div>
+      <h2>Before you open this up</h2>
+      <p class="eyebrow">one time only</p>
+    </div>
+    <button class="icon" data-close aria-label="Close">&#10005;</button>
+  </div>
+
+  <div class="sheet-body">
+    <p>From here on the tracker stops being coy. It will name every clip, quote the
+       first thing said in it, and show you a frame from it, including clips you
+       have not found yet.</p>
+    <div class="credit">
+      <b>It will spoil the game</b>
+      <p>Finding out what is on these tapes is the whole of IMMORTALITY. This takes
+         that away. There is no putting it back.</p>
+    </div>
+    <div class="credit">
+      <b>Some of it is explicit</b>
+      <p>The film contains nudity and violence, and the frames shown here are taken
+         from it. Consider where you are sitting.</p>
+    </div>
+    <p class="dim">You can go back to <b>Total only</b> at any time, and this will
+       not be asked again.</p>
+    <p>
+      <button id="warn-yes" class="ghost primary">Show me the clips</button>
+      <button id="warn-no" class="ghost">Not yet</button>
+    </p>
+  </div>
+</dialog>
+
+<dialog id="zoom" class="zoom">
+  <button class="ghost zoom-close" data-close aria-label="Close">&#x2715;</button>
+  <figure>
+    <div id="zoom-pic"></div>
+    <figcaption id="zoom-cap"></figcaption>
+  </figure>
+</dialog>
+
+<script src="core.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

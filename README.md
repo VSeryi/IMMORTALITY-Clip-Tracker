@@ -1,121 +1,334 @@
 # IMMORTALITY Clip Tracker
 
 [![build](https://github.com/VSeryi/IMMORTALITY-Clip-Tracker/actions/workflows/build.yml/badge.svg)](https://github.com/VSeryi/IMMORTALITY-Clip-Tracker/actions/workflows/build.yml)
+[![pages](https://github.com/VSeryi/IMMORTALITY-Clip-Tracker/actions/workflows/pages.yml/badge.svg)](https://github.com/VSeryi/IMMORTALITY-Clip-Tracker/actions/workflows/pages.yml)
 
-Desktop app that reads your [IMMORTALITY](https://store.steampowered.com/app/1350200/IMMORTALITY/)
-save and tells you exactly which clips you are still missing — and how to reach
+Reads your [IMMORTALITY](https://store.steampowered.com/app/1350200/IMMORTALITY/)
+save and tells you exactly which clips you are still missing, and how to reach
 each one.
 
-Windows, macOS and Linux. One self-contained file, nothing to install.
+**[Open it in your browser](https://vseryi.github.io/IMMORTALITY-Clip-Tracker/)**,
+nothing to install. Or [download the app](../../releases) for Windows, macOS or
+Linux, which finds your save on its own.
 
-There is also a **[browser version](https://vseryi.github.io/IMMORTALITY-Clip-Tracker/)** —
-same tracker, nothing to download. Your save is read inside the page and never
-leaves your machine.
+Your save is read on your own machine. It is never uploaded.
 
-> Heavy spoilers: the clip guide describes every scene in the game. The app
-> starts fully guarded and only reveals as much as you ask it to.
+> The app is spoiler-free until you ask it for more, and so is this page: how
+> the game works underneath is folded away under **Spoilers** further down.
 
 ## Use it
 
-1. Grab the build for your platform from [Releases](../../releases).
-2. Quit the game, so the save on disk is up to date.
-3. Run it.
+Drop `SaveGame.abr` onto the page, or let the desktop app find it for you.
 
-The save is found automatically:
+- Windows `%USERPROFILE%\AppData\LocalLow\Half Mermaid Productions\Immortality\<steam-id>\`
+- macOS `~/Library/Application Support/Half Mermaid Productions/Immortality/`
+- Linux `~/.config/unity3d/Half Mermaid Productions/Immortality/`
+- Steam Deck / Proton `~/.steam/steam/steamapps/compatdata/1350200/pfx/drive_c/users/steamuser/AppData/LocalLow/Half Mermaid Productions/Immortality/`
 
-1. `SaveGame.abr` sitting next to the app — drop a
-   [Steam Cloud](https://store.steampowered.com/account/remotestorageapp/?appid=1350200)
-   download here and it just works
-2. the game's own save folder
-   - Windows `%USERPROFILE%\AppData\LocalLow\Half Mermaid Productions\Immortality\<steam-id>\`
-   - macOS `~/Library/Application Support/Half Mermaid Productions/Immortality/`
-   - Linux `~/.config/unity3d/…` or the Proton prefix for app 1350200
-3. your `Downloads` folder
+Can't find it? Steam keeps a copy. There is a
+[Steam Cloud](https://store.steampowered.com/account/remotestorageapp/?appid=1350200)
+link on the page.
 
-Otherwise use **Open save**, or **About**, which lists every folder searched on
-your machine plus the Steam Cloud link.
+Whichever save you open is remembered, so later visits read it again by
+themselves and **Reload** picks up your latest progress without you finding the
+file. The handle lives in your browser and the file is only read when you open
+the page. Chromium-based browsers only; everywhere else, drag and drop still
+works.
 
 ## Spoiler control
 
-Use **Show me** in the header. It starts at the most guarded setting.
+Use **Show me** in the header. It starts at the most guarded setting, and your
+choice is remembered for next time.
 
 | Setting | Shows |
 | --- | --- |
 | **Total only** *(default)* | how many clips you still have to find, and nothing else |
 | Per movie | how many are left in each movie |
-| Clip numbers | which numbers are missing; secrets are flagged only once you have found them |
-| Clip details | names, dates and what happens in each clip |
-| Everything | adds the route: which clip to match-cut or rewind from |
+| Clip numbers | which numbers are missing |
+| Clip details | names, dates, the first line spoken in each clip, and a still of it |
+| Everything | adds the route: where to start, what to do there and when, and a frame with a ring around what to click |
 
 Stuck on one clip? **Reveal details** and **Reveal this clip** open up that one
 entry without changing the setting for everything else.
 
-### Secrets
+Everything works from the keyboard: Tab reaches every control, movie and clip,
+and the arrow keys move through the clip list. Once you have scrolled a screen
+down, a button in the corner takes you back to the top.
 
-Not every clip is reached the same way. The **Secrets** switch sits next to
+### The Secrets switch
+
+Some clips are kept apart from the rest. The **Secrets** switch sits next to
 *Show me* and applies at every level. It is off by default, which keeps those
-clips out of the list and out of every count — including the totals, so the
+clips out of the list and out of every count, including the totals, so the
 numbers never hint at what is being left out.
 
-Turn it on whenever you want them included.
+A red `*` next to a movie means it still hides something you have switched off.
+
+### Pictures
+
+Every clip shows the scene it actually is, and every match-cut shows a frame of
+the clip it starts from, at the moment the object is on screen, with a ring
+around the place to click. Click any picture to see it larger.
+
+They all ship with the app in one archive, `app/pictures.bin`, and nothing is
+ever read off the machine running it. Each one is padded to the same 480x270
+box so narrow and wide films sit side by side without the list jumping.
+
+They are frames from IMMORTALITY and are **not** covered by this project's
+licence. See [app/pictures.txt](app/pictures.txt) and the [NOTICE](NOTICE).
+
+The game contains nudity and the point of it is not knowing what is on the tapes,
+so they are packed into one archive rather than left as a browsable folder, the
+app asks before it starts showing them, and the archive is only fetched once you
+have said yes. That is packaging and courtesy, not protection: it is trivially
+unpacked.
 
 ## How it works
 
 `SaveGame.abr` is a .NET `BinaryFormatter` (MS-NRBF) stream and is *not*
-encrypted, so the app reads it directly with Microsoft's own
-[`System.Formats.Nrbf`](https://learn.microsoft.com/dotnet/standard/serialization/binaryformatter-migration-guide/read-nrbf-payloads).
-No online save editor, no `jq`, no JSON export. Nothing leaves your machine.
+encrypted, so it is read directly. No online save editor, no JSON export,
+no network requests. What it reads from the save is under the spoilers at the end
+of this section.
 
-Three things come straight out of the save:
+### Where the clip list comes from
+
+Everything the app knows about the game is in `app/clips.json`, generated by
+`tools/make-data.py` from the game's own data: one 32 MB `MonoBehaviour` inside
+`sharedassets4.assets` (the game's `MetaData`), plus the English string table in
+`resources.assets` for the names it shows.
+
+Neither has a type tree, so they are read field by field in the order the game's
+own classes declare them (`MetaData`, `VideoData`, `MaskData`, `KeyData`,
+`SubtitleData`, `SecretData`, `VideoLinkData` and `EntryPointData`, in
+`Managed/Assembly-CSharp.dll`). Nothing is searched for or skipped, and the read
+has to end on the table's last byte, so a change in the layout fails loudly
+instead of producing plausible nonsense.
+
+That gives what no spreadsheet had:
+
+* Every clip's film, take and date, exactly as the game labels it.
+* **Every** clickable thing in a clip, under the name the game shows for it, with
+  its outline tracked frame by frame and whether it can be clicked at that moment.
+* The game's own table of where a click can land, which decides every match-cut.
+* The line actually spoken, which is the clip's first subtitle.
+
+Checked against the community guide, 781 of its 792 match-cuts are confirmed by
+the game's table. Of the other 11, 8 do cut in, but on a different object from
+the one the guide names, and 3 go through a clip the table has no such cut from.
+
+### Match-cuts
+
+A click does what the game's `Database.DoSearch` does. It takes the outline's
+name up to any `-`, adds every name in that outline's list of valid links (so a
+chair also searches *director's chair* and *stage chair*), and looks each one up
+in the game's table of where a cut on that name can land. It never lands on the
+clip it starts from, and picks one of the rest at random, favouring clips you
+have not watched as the game goes on.
+
+So each route says how sure it is: *always cuts here* when the target is the only
+place that click can land, otherwise how many other clips it might land on
+instead. Usually those clips have the same thing, so a wrong cut can be clicked
+again from there, and the route says *that have it too*. Where the game also
+links it to similar things (a clock also searches watches), it can land on more
+clips than hold it, and the route says separately in how many other clips the
+same thing can be clicked. Routes are sorted by that. A few clips are held back
+until enough of the game has been watched, and say so while they are.
+
+### Drawing where to click
+
+A clip's poster is rarely its first frame, so an outline drawn onto it misses
+whatever has moved since. Every match-cut therefore gets its own frame, decoded
+at a moment its outline is defined and clickable, so the ring and the picture
+describe the same instant. The first half second is avoided, since it is often a
+fade or the tail of the slate, and a frame that decodes blank is ruled out. The
+game measures from the bottom left of the video; the generator maps that onto
+the letterboxed picture once, so the app only places a ring.
+
+Frame numbers count in each video's own rate, and the rates differ: most clips
+run at 24 fps, but many at 48 and a few at 16 or 50. Assuming 24 sends every
+picture from a 48 fps clip to twice the right time. The generator checks every
+keyframe's stored frame number against its time, which is how that was caught.
+
+All 702 match-cuts have a ring, routes to the same object share a frame, and
+every picture together is 3.3 MB.
+
+### Film, take and date
+
+The game stores these per clip and builds the label under each tile from them:
+the film, the scene number and camera letter (*39B*), and the date. The
+community guide agrees on every ordinary clip but three, and there the game
+wins, since it is what you see on the grid: it labels both 240 and 241 *2OE 37*,
+and 249 *2OE 51A* although its slate says 59A.
+
+### Where the pictures come from
+
+`sharedassets4.assets` holds one `Texture2D` per clip, named after its number
+(`IMM_001` and on), the very ones the game's tiles use. That is the preferred
+source for each clip's still: a clean, deliberately chosen frame. The few that
+are missing, black, or one flat colour come from the video instead, as does
+every match-cut frame.
+
+Each clip ships as a Bink 2 file in `StreamingAssets`, 26 GB in all. Bink 2 is
+RAD Game Tools' proprietary codec, and the game carries RAD's own runtime for it,
+`Plugins/x86_64/bink2w64.dll`. The generator loads that and calls `BinkOpen`,
+`BinkGoto`, `BinkDoFrame` and `BinkCopyToBuffer`, so every frame is decoded
+exactly as the game plays it, straight from where it is, in about a tenth of a
+second. That also makes the generator Windows only.
+
+The unmerged FFmpeg decoder
+([xypwn/ffmpeg-bink2-builds](https://github.com/xypwn/ffmpeg-bink2-builds)) was
+tried first. It crashed on, or smeared, about four clips in ten and could only
+reach a frame by decoding everything before it.
+
+### Building the data
+
+[tools/make-data.py](tools/make-data.py) does all of it in about a minute. It
+needs a local copy of the game and nothing else, not even a save, and is run by
+hand:
+
+```bash
+python -m venv tools/.venv
+tools/.venv/Scripts/python -m pip install Pillow UnityPy
+tools/.venv/Scripts/python tools/make-data.py "<game>/Immortality_Data"
+```
+
+Pictures already made are kept in `tools/.work`, so running it again only makes
+what is new.
+
+### Spoilers
+
+The rest of how it works is the game's own rules, which are part of what there is
+to discover. Open it only if you do not mind knowing.
+
+<details>
+<summary><b>Secret clips, the ending, and what the save holds</b></summary>
+
+#### What the save holds
 
 | Field | Used for |
 | --- | --- |
 | `Game.ViewHistory[].ClipID` | which clips you have watched |
-| `ViewedSave.IsSupernatural` | whether a clip is a secret — **authoritative** |
-| `Game.AssignedSecrets` | which clip each monologue secret hides in *this* playthrough |
+| `ViewedSave.IsSupernatural` | how many secrets you have seen, which the ending counts |
+| `Game.AssignedSecrets` | which clip each free-floating secret landed in *this* playthrough |
+| `Game.TotalThemeA`, `B`, `C` | the three hidden scores that gates and the ending check |
 
 `AssignedSecrets` is randomised per save, so no static guide can know it. That is
 why the app can point at the exact clip to revisit instead of offering a vague
 hint.
 
-### The clip numbering fix
+#### How many clips there are
 
-`Immortality_Guide.csv` lists a secret immediately after the clip it hides in,
-but the game hands out `ClipID`s in a different local order — so roughly one row
-in twenty ends up describing its neighbour. Taken literally, the guide will claim
-you are missing regular clips when you are only missing secrets.
+288: 202 ordinary clips, 85 secrets and the ending. The game holds 290 videos;
+289 is the ending's last shot and 290 the menu's backdrop. Secrets never appear
+on the grid, so the game gives them no camera letter, and the free-floating
+secrets and the ending belong to no film, so they are listed under *Other*.
 
-The app re-deals the guide rows onto the real numbering using `IsSupernatural`,
-which the save reports for every clip you have watched. Where a clip is unwatched
-the count settles it: if the number of unwatched clips equals the number of
-secrets still outstanding, every one of them must be a secret.
+#### How secrets open
 
-On a 278/288 save this turns 16 mislabelled entries into 0.
+No match-cut ever lands on a secret. A secret opens while a stretch of another
+clip plays backwards at the right speed (`SecretData`). 52 of the 85 need half
+speed, which holding <kbd>,</kbd> gives in any clip; the other 33 need 1x to 8x,
+which the arrow keys give, though inside a clip that plays reversed they swap
+direction. Each step names the clip, the moment and what to press.
+
+* 70 secrets have one fixed entrance, with no luck involved. 19 of them sit inside
+  another secret, so the steps walk the whole chain from the ordinary clip it
+  starts in.
+* 15 free-floating secrets can each turn up in a pool of up to 48 clips. Opening
+  one of those clips, if it holds none yet, can place one there by chance, and it
+  stays for good. The save records that, so the app shows the exact clip once it
+  is placed, and otherwise only the clips still free.
+* None opens before a little of the game has been watched (about 3%), and some
+  need 10 to 30%. The game measures this with the theme scores every new clip
+  adds to, so the app reads your save and says how far you are while one is
+  still held back.
+
+A secret is only used as the starting clip of a match-cut when no ordinary clip
+holds the object. Two secrets' posters were never painted, so their stills come
+from the video.
+
+#### The ending
+
+Clip 288 is the ending, and nothing leads to it. Each time you leave a clip for
+the grid, `Game.CheckEndgame` starts it if 116 different clips have been watched
+(40% of the game's 290 videos), a quarter of each of three hidden theme scores
+is reached, 5 secrets and clips 188, 267 and 269 have been seen, and the clip you
+just left is one of 73 key clips. Clip 288 then takes over the grid tile by tile
+and plays into the credits. The app checks each condition against your save.
+
+</details>
+
+## Layout
+
+```
+app/                  the tracker, plain HTML, CSS and JS, no build step
+  index.html          the page and its dialogs
+  app.js              UI
+  core.js             save reader and clip logic, no DOM
+  style.css
+  sw.js               offline cache for the installed web app
+  clips.json          every clip and every way into it, from the game
+  pictures.bin        a still per clip and a frame per match-cut, packed
+  pictures.json       where each picture sits inside pictures.bin
+shell/                native wrapper around app/
+  Program.cs          window, and the bridge that finds and reads the save
+  Messages.cs         what the page and the shell send each other
+  SiteServer.cs       serves app/ from inside the executable
+  SaveLocator.cs      the folders searched on each OS
+tools/make-data.py    regenerates clips.json and the pictures from the game
+tools/make-icon.ps1   regenerates shell/icon.ico and app/icon.png
+```
+
+There is **one** implementation. `app/` is the product; the desktop build wraps
+the very same files, so the two can never drift apart.
 
 ## Build
 
-Needs the [.NET 10 SDK](https://dotnet.microsoft.com/download).
+### The web version
+
+There is nothing to build. Serve the folder over HTTP (opening the file directly
+stops it loading its data), with caching off so edits show on reload:
 
 ```bash
-dotnet run --project src/ImmortalityClipTracker
+npx http-server app -p 8099 -c-1
 ```
 
-Release builds are single-file, self-contained, trimmed and compressed — one
-~21 MB executable that starts in well under a second and needs no runtime:
+GitHub Pages publishes `app/` as-is on every push to `main`. Pages must be set to
+**Source: GitHub Actions** in the repository settings.
+
+### The desktop version
+
+Needs the [.NET 10 SDK](https://dotnet.microsoft.com/download). On Linux it also
+needs WebKitGTK (`libwebkit2gtk-4.1-0`), which is the system webview.
 
 ```bash
-dotnet publish src/ImmortalityClipTracker -c Release -r win-x64 -o dist
+dotnet run --project shell
 ```
 
-Passing any `-r` runtime identifier switches on the single-file settings, so
-there is nothing else to remember. CI uses `win-x64`, `osx-arm64`, `osx-x64` and
-`linux-x64`.
+Add `-- --dev` to that to turn on the webview's developer tools.
 
-Windows and Linux ship the bare executable. macOS ships a `.dmg` because a GUI
-program there has to be an `.app` *bundle* — a folder containing
-`Contents/MacOS/` and an `Info.plist` — and a folder cannot be a release asset.
-The disk image is built with `hdiutil` and includes an `/Applications` shortcut
-to drag onto.
+`app/` is embedded into the assembly, so the published executable carries the
+whole tracker. Any `-r` runtime identifier switches on the single-file settings:
+
+```bash
+dotnet publish shell -c Release -r win-x64 -o dist
+```
+
+CI builds `win-x64`, `osx-arm64`, `osx-x64` and `linux-x64`. Windows and Linux
+ship the bare executable; macOS ships a `.dmg`, because a GUI program there has
+to be an `.app` *bundle*, a folder, and a folder cannot be a release asset.
+
+#### Why a webview and not a native toolkit
+
+The app reads a file and renders a list. Writing that screen twice, once in XAML
+and once in HTML, meant every change had to be made, and verified, in both. The
+shell hosts the web build in the operating system's own webview
+(WebView2, WKWebView, WebKitGTK), so there is a single UI to maintain and the app
+looks exactly like the website.
+
+What the desktop build adds over the browser is `SaveLocator`: it knows the Unity,
+Steam, Proton and Flatpak paths and finds the save without being told. That is the
+reason it still exists.
 
 ### Releasing
 
@@ -123,69 +336,37 @@ Push a tag and the workflow builds all four platforms and publishes a GitHub
 release with the binaries attached:
 
 ```bash
-git tag v1.0.0
-git push origin v1.0.0
+git tag v1.2.0
+git push origin v1.2.0
 ```
 
-The tag also sets the assembly version — `v1.2.3` becomes `1.2.3`.
-
-### Layout
-
-```
-src/ImmortalityClipTracker/
-  Models/      Clip, spoiler levels, credits
-  Services/    SaveData (NRBF), ClipGuide (CSV + realignment), SaveLocator
-  ViewModels/  MainViewModel
-  Views/       MainWindow
-  Assets/      icon, clip guide
-web/                  the browser version — plain HTML, CSS and JS
-tools/make-icon.ps1   regenerates icon.ico and icon.png
-```
-
-Drop an updated `Immortality_Guide.csv` next to the executable to override the
-bundled copy.
-
-### The browser version
-
-`web/` is the same tracker with the NRBF reader and the realignment ported to
-JavaScript. No framework, no build step, no dependencies. It reads the save with
-`File.arrayBuffer()`, so nothing is uploaded and the page works offline once
-loaded.
-
-The clip guide and the icon are not duplicated there — the Pages workflow copies
-them out of `src/ImmortalityClipTracker/Assets/` at deploy time, so there is one
-source of truth. To preview locally, copy them in yourself (they are gitignored)
-and serve the folder over HTTP:
-
-```bash
-cp src/ImmortalityClipTracker/Assets/Immortality_Guide.csv src/ImmortalityClipTracker/Assets/icon.png web/
-npx http-server web -p 8099 -c-1
-```
-
-Deployment runs on every push to `main` that touches `web/` or the assets.
-GitHub Pages must be set to **Source: GitHub Actions** in the repository
-settings.
+The tag also sets the assembly version: `v1.2.3` becomes `1.2.3`.
 
 ## Credits
 
-This app is mostly glue. The work it is built on:
+This is mostly glue. The work it is built on:
 
 | | |
 | --- | --- |
-| [The clip list](https://steamcommunity.com/sharedfiles/filedetails/?id=3342793414) | every clip with its take, date and match-cut objects — the guide shipped with the app. Derived in turn from the [completionist guide](https://steamcommunity.com/sharedfiles/filedetails/?id=2860754029) |
+| [The clip list](https://steamcommunity.com/sharedfiles/filedetails/?id=3342793414) | first mapped every clip's film, take and date; now a cross-check for the game's own data. Derived in turn from the [completionist guide](https://steamcommunity.com/sharedfiles/filedetails/?id=2860754029) |
 | [Reading the save](https://steamcommunity.com/sharedfiles/filedetails/?id=3731545899) | worked out that `SaveGame.abr` holds your view history |
 | [The idea](https://steamcommunity.com/sharedfiles/filedetails/?id=3204009205) | the original "which videos have I missed" counter |
 
-The same list is in the app under **About**.
+The same list is under **About**.
 
 Made by [XxSeRyIxX](https://steamcommunity.com/id/xxseryixx/).
 
 ## Licence
 
 [GNU AGPL v3](LICENSE) or later. You are free to use, study, modify and share
-it. If you distribute a modified version — or run one as a network service — you
-must make your source available under the same licence.
+it. If you distribute a modified version, or run one as a network service, you
+have to publish your source under the same licence.
 
-The licence covers the application code. `Immortality_Guide.csv` is
-community-authored clip data from the guides above. Not affiliated with Half
-Mermaid or Sam Barlow. See [NOTICE](NOTICE).
+The pictures are **not** covered by that licence. They are frames from
+IMMORTALITY, copyright Half Mermaid Productions, included only as small pictures
+and not licensed for redistribution. A fork may take the code, but not those. See
+[NOTICE](NOTICE) and [app/pictures.txt](app/pictures.txt).
+
+Not affiliated with, endorsed by, or connected to Half Mermaid or Sam Barlow. If
+you hold the rights and want the pictures removed, open an issue and they will go
+immediately, no questions asked.

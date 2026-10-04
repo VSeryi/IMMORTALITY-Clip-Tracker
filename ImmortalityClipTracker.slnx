@@ -1,5 +1,5 @@
 <Solution>
-  <Folder Name="/src/">
-    <Project Path="src/ImmortalityClipTracker/ImmortalityClipTracker.csproj" />
+  <Folder Name="/shell/">
+    <Project Path="shell/ImmortalityClipTracker.csproj" />
   </Folder>
 </Solution>

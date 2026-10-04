@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>ImmortalityClipTracker</AssemblyName>
+    <RootNamespace>ImmortalityClipTracker</RootNamespace>
+    <ApplicationIcon>icon.ico</ApplicationIcon>
+    <InvariantGlobalization>true</InvariantGlobalization>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <Product>IMMORTALITY Clip Tracker</Product>
+    <Description>Shows which clips of IMMORTALITY you have not watched yet.</Description>
+    <Version>0.0.0</Version>
+    <Copyright>Copyright (C) 2026 XxSeRyIxX. GNU AGPL v3 or later.</Copyright>
+  </PropertyGroup>
+
+  <!-- Any RID-targeted publish becomes one self-contained file. -->
+  <PropertyGroup Condition="'$(RuntimeIdentifier)' != ''">
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <PublishTrimmed>true</PublishTrimmed>
+    <TrimMode>full</TrimMode>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>none</DebugType>
+  </PropertyGroup>
+
+  <!-- The web app is the product; it travels inside the executable. RecursiveDir
+       keeps subfolders from collapsing onto the files beside them. -->
+  <ItemGroup>
+    <EmbeddedResource Include="..\app\**\*"
+                      LogicalName="site.%(RecursiveDir)%(Filename)%(Extension)" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Photino.NET" Version="4.0.16" />
+  </ItemGroup>
+
+</Project>

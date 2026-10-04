@@ -1,0 +1,22 @@
+app/pictures.bin holds frames from IMMORTALITY.
+
+    Copyright (c) Half Mermaid Productions. All rights reserved.
+
+They are NOT part of this project's source code and are NOT covered by its
+GNU AGPL v3 licence. They are included only as small pictures so the tracker
+can show you which clip is which and where a match-cut starts, and must not be
+redistributed separately or treated as freely licensed material.
+
+They are packed into a single archive rather than left loose because the game
+contains nudity and heavy spoilers, and a folder of its frames is neither a
+reasonable thing to browse by accident nor to have rendered in a repository.
+That is packaging, not protection.
+
+This project is not affiliated with, endorsed by, or connected to Half Mermaid
+Productions or Sam Barlow.
+
+If you are the rights holder and would like these removed, open an issue at
+https://github.com/VSeryi/IMMORTALITY-Clip-Tracker and they will be taken out
+immediately, no questions asked.
+
+IMMORTALITY: https://store.steampowered.com/app/1350200/IMMORTALITY/

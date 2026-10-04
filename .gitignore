@@ -5,6 +5,9 @@ publish/
 dist/
 artifacts/
 
+# Pictures already made; only the packed archive in app/ is committed
+tools/.work/
+
 # IDE / tooling
 .vs/
 .vscode/
@@ -12,6 +15,8 @@ artifacts/
 *.user
 *.suo
 *.DotSettings.user
+tools/.venv/
+__pycache__/
 
 # OS noise
 .DS_Store
@@ -20,6 +25,3 @@ Thumbs.db
 # Never commit a personal save
 *.abr
 
-# Copied in by the Pages workflow (and by hand for local preview)
-web/Immortality_Guide.csv
-web/icon.png

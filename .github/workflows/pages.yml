@@ -4,8 +4,7 @@ on:
   push:
     branches: [main]
     paths:
-      - 'web/**'
-      - 'src/ImmortalityClipTracker/Assets/**'
+      - 'app/**'
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
@@ -27,18 +26,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
-      # The clip guide and the icon live with the desktop app so there is only
-      # ever one copy of them in the repository.
-      - name: Assemble site
-        run: |
-          mkdir -p _site
-          cp -r web/. _site/
-          cp src/ImmortalityClipTracker/Assets/Immortality_Guide.csv _site/
-          cp src/ImmortalityClipTracker/Assets/icon.png _site/
-
+      # app/ is the site: no build step, no asset copying, nothing to go stale.
       - uses: actions/configure-pages@v6
       - uses: actions/upload-pages-artifact@v5
         with:
-          path: _site
+          path: app
       - id: deploy
         uses: actions/deploy-pages@v5

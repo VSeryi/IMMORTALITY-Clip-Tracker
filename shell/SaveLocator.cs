@@ -1,14 +1,26 @@
-namespace ImmortalityClipTracker.Services;
+namespace ImmortalityClipTracker;
 
-public static class SaveLocator
+internal static class SaveLocator
 {
-    public const string SteamCloudUrl =
-        "https://store.steampowered.com/account/remotestorageapp/?appid=1350200";
-
     private const string SaveName = "SaveGame.abr";
 
     /// <summary>The folders searched, in order, for the "where is my save" help.</summary>
     public static IReadOnlyList<string> SearchedFolders() => [.. Roots()];
+
+    /// <summary>Where an open dialog should start: beside the real save if there is one,
+    /// otherwise the game's own folder. Skips the app directory, which always exists and
+    /// is never where the player keeps their save.</summary>
+    public static string StartFolder()
+    {
+        string? found = Find();
+        if (found is not null) return Path.GetDirectoryName(found) ?? "";
+
+        foreach (string root in Roots().Skip(1))
+        {
+            if (Directory.Exists(root)) return root;
+        }
+        return "";
+    }
 
     /// <summary>A save dropped next to the app wins, then the game's own folders.</summary>
     public static string? Find()
